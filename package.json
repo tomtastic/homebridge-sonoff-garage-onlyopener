@@ -1,7 +1,7 @@
 {
-  "name": "homebridge-garage-door-opener",
+  "name": "homebridge-sonoff-garage-door",
   "version": "1.0.0",
-  "description": "Hombridge plugin for Garage Door Opener",
+  "description": "Homebridge plugin for Sonoff-4CH to open garage doors and such",
   "main": "index.js",
   "engines": {
     "node": ">=6.12.2",
@@ -9,21 +9,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ankurp/homebridge-garage-door-opener.git"
+    "url": "https://github.com/DualBit/homebridge-garage-opener.git"
   },
   "keywords": [
     "homebridge-plugin",
     "garage-door-opener",
     "raspberry-pi",
-    "homebridge"
+    "homebridge",
+    "sonoff",
+    "sonoff-4ch"
   ],
   "scripts": {
     "lint": "eslint ."
   },
-  "author": "Ankur Patel <ankur.patel@ymail.com> (https://www.encoredevlabs.com)",
+  "author": "Alberto Paladino <alberto.paladino@dualb.it> (https://www.dualb.it)",
   "license": "ISC",
   "dependencies": {
-    "rpi-gpio": "^0.9.1"
+    "request": "^2.83.0"
   },
   "devDependencies": {
     "eslint": "^4.13.1",

@@ -5,15 +5,19 @@
     "port": 51826,
     "pin": "031-45-154"
   },
-  
+
   "description": "",
 
   "accessories": [
     {
       "accessory": "Garage Door Opener",
       "name": "Pi Garage Opener",
+      "ip": "192.168.2.75",
       "doorRelayPin": 4,
-      "openCloseTime": 30000
+      "openCloseTime": 30000,
+      "openingTime": 27000,
+      "closureTime": 30000,
+      "timeBeforeClosure": 10000
     }
   ],
 

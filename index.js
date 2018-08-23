@@ -1,9 +1,6 @@
-const gpio = require('rpi-gpio');
-gpio.setMode(gpio.MODE_BCM);
+var request = require('request');
 
 let Service, Characteristic, TargetDoorState, CurrentDoorState;
-const OFF = true;
-const ON = false;
 
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
@@ -17,10 +14,13 @@ class GarageDoorOpener {
   constructor(log, config) {
     this.log = log;
     this.name = config.name;
-    this.openCloseTime = config.openCloseTime;
-    this.doorRelayPin = config.doorRelayPin;
+    this.ip = config.ip;
+    this.openCloseTime = config.openCloseTime || 0;
+    this.openingTime = config.openingTime || this.openCloseTime;
+    this.closureTime = config.closureTime || this.openingTime;
+    this.doorRelayPin = this.relayNumberToGPIO(config.doorRelayPin);
+    this.timeBeforeClosure = config.timeBeforeClosure || 0;
 
-    gpio.setup(this.doorRelayPin, gpio.DIR_HIGH);
     this.currentDoorState = CurrentDoorState.CLOSED;
     this.targetDoorState = TargetDoorState.CLOSED;
   }
@@ -29,22 +29,31 @@ class GarageDoorOpener {
     this.log('Identify requested!');
     callback(null);
   }
-
+  //Pulse,15,1,1000
   openCloseGarage(callback) {
-    gpio.write(this.doorRelayPin, ON);
-    setTimeout(() => {
-      gpio.write(this.doorRelayPin, OFF);
-      callback();
-    }, 500);
+
+    request.get({
+      url: 'http://' + this.ip + '/control?cmd=Pulse,' + this.doorRelayPin + ',1,500' /*+ (cmd || 'Signal')*/,
+      timeout: 120000
+    }, (error, response, body) => {
+      this.log.debug('openCloseGarage',response.statusCode,body);
+      if (!error && response.statusCode == 200) {
+        //this.log.debug('Response: %s', body);
+        callback();
+      }
+
+      //this.log.debug('Error setting door state. (%s)', error);
+    });
+
   }
 
   getServices() {
     const informationService = new Service.AccessoryInformation();
 
     informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'Encore Dev Labs')
-      .setCharacteristic(Characteristic.Model, 'Pi Garage Door Opener')
-      .setCharacteristic(Characteristic.SerialNumber, 'Raspberry Pi');
+      .setCharacteristic(Characteristic.Manufacturer, 'Dualbit')
+      .setCharacteristic(Characteristic.Model, 'Sonoff-4CH Pro Garage Door Opener')
+      .setCharacteristic(Characteristic.SerialNumber, '0xl33t');
 
     this.service = new Service.GarageDoorOpener(this.name, this.name);
     this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED);
@@ -56,7 +65,10 @@ class GarageDoorOpener {
       })
       .on('set', (value, callback) => {
         this.targetDoorState = value;
+        this.log('voglio ' + this.doorStateToString(value));
+        clearTimeout(this.timerBeforeClosure);
         if (this.targetDoorState === TargetDoorState.OPEN) {
+          // voglio aprire
           if (this.currentDoorState === CurrentDoorState.CLOSED) {
             this.openCloseGarage(() =>
               this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.OPENING));
@@ -92,13 +104,14 @@ class GarageDoorOpener {
       })
       .on('set', (value, callback) => {
         this.currentDoorState = value;
-        this.log('current', this.currentDoorState);
+        this.log('current status: ', this.doorStateToString(this.currentDoorState));
         if (this.currentDoorState === CurrentDoorState.OPENING) {
           clearTimeout(this.openCloseTimer);
           this.doorOpenStartTime = new Date();
           const timeSinceDoorStartedClosing = new Date() - this.doorCloseStartTime;
-          let stateChangeTimer = this.openCloseTime;
-          if (timeSinceDoorStartedClosing < this.openCloseTime) {
+          let openingTimer = this.openCloseTime != 0 ? this.openCloseTime : this.openingTime;
+          let stateChangeTimer = openingTimer;
+          if (timeSinceDoorStartedClosing < openingTimer) {
             stateChangeTimer = timeSinceDoorStartedClosing;
           }
           this.openCloseTimer = setTimeout(() => {
@@ -108,13 +121,25 @@ class GarageDoorOpener {
           clearTimeout(this.openCloseTimer);
           this.doorCloseStartTime = new Date();
           const timeSinceDoorStartedOpening = new Date() - this.doorOpenStartTime;
-          let stateChangeTimer = this.openCloseTime;
-          if (timeSinceDoorStartedOpening < this.openCloseTime) {
+          let closureTimer = this.openCloseTime != 0 ? this.openCloseTime : this.closureTime;
+          let stateChangeTimer = closureTimer;
+          if (timeSinceDoorStartedOpening < closureTimer) {
             stateChangeTimer = timeSinceDoorStartedOpening;
           }
           this.openCloseTimer = setTimeout(() => {
             this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.CLOSED);
           }, stateChangeTimer);
+        } else if (this.currentDoorState === CurrentDoorState.OPEN) {
+          if (this.timeBeforeClosure != 0) {
+            this.log('TRA ' + this.timeBeforeClosure / 1000 + ' SECONDI DOVRAI RICHIUDERE DA SOLO');
+            this.timerBeforeClosure = setTimeout(() => {
+              this.targetDoorState = TargetDoorState.CLOSED;
+              this.openCloseGarage(() =>
+                this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED));
+            }, this.timeBeforeClosure);
+          } else {
+            this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED);
+          }
         }
         callback();
       });
@@ -127,4 +152,37 @@ class GarageDoorOpener {
 
     return [informationService, this.service];
   }
+
+  doorStateToString(state) {
+    switch (state) {
+    case CurrentDoorState.OPEN:
+      return 'OPEN';
+    case CurrentDoorState.CLOSED:
+      return 'CLOSED';
+    case CurrentDoorState.STOPPED:
+      return 'STOPPED';
+    case CurrentDoorState.OPENING:
+      return 'OPENING';
+    case CurrentDoorState.CLOSING:
+      return 'CLOSING';
+    default:
+      return 'UNKNOWN';
+    }
+  }
+  // Relay number to GPIO number, I don't know if they are the same for every Sonoff
+  relayNumberToGPIO(relay) {
+    switch (relay) {
+    case 1:
+      return 12;
+    case 2:
+      return 5;
+    case 3:
+      return 4;
+    case 4:
+      return 15;
+    default:
+      return 12;
+    }
+  }
+
 }
