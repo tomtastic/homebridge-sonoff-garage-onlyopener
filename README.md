@@ -19,15 +19,14 @@ Just add the following config to your homebridge config file located at this (de
 {
   "bridge": {
     "name": "Homebridge",
-    "username": "CC:22:3D:E3:CE:30",
+    "username": "CC:22:3D:E3:CE:50",
     "port": 51826,
     "pin": "031-45-154"
   },
-  
+
   "description": "",
 
   "accessories": [
-    "accessories": [
     {
       "accessory": "Sonoff Garage Door Opener",
       "name": "Pi Garage Opener",
@@ -50,4 +49,4 @@ openingTime and closureTime should be used only if opening and closure times are
 Also a openCloseTime = 0 can be set for these doors/gates that have just a lock to open. The advantage of using this instead of a common switch is that Apple requires all security Homekit devices to ask for passcode / TouchID / FaceID before triggering this kind of devices.
 No more wrong taps on the door unlock!
 
-CREDITS for original plugin that I used as a template goes to @ankurp
+CREDITS for original plugin that I used as a template goes to @ankurp. Thank you man!
