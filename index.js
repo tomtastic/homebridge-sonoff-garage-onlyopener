@@ -65,10 +65,9 @@ class GarageDoorOpener {
       })
       .on('set', (value, callback) => {
         this.targetDoorState = value;
-        this.log('voglio ' + this.doorStateToString(value));
         clearTimeout(this.timerBeforeClosure);
         if (this.targetDoorState === TargetDoorState.OPEN) {
-          // voglio aprire
+          // want to open
           if (this.currentDoorState === CurrentDoorState.CLOSED) {
             this.openCloseGarage(() =>
               this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.OPENING));
@@ -131,7 +130,7 @@ class GarageDoorOpener {
           }, stateChangeTimer);
         } else if (this.currentDoorState === CurrentDoorState.OPEN) {
           if (this.timeBeforeClosure != 0) {
-            this.log('TRA ' + this.timeBeforeClosure / 1000 + ' SECONDI DOVRAI RICHIUDERE DA SOLO');
+            this.log.debug('AUTOCLOSING in ' + this.timeBeforeClosure / 1000 + ' SECONDS');
             this.timerBeforeClosure = setTimeout(() => {
               this.targetDoorState = TargetDoorState.CLOSED;
               this.openCloseGarage(() =>
