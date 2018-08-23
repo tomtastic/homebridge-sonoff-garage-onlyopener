@@ -7,7 +7,7 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   TargetDoorState = Characteristic.TargetDoorState;
   CurrentDoorState = Characteristic.CurrentDoorState;
-  homebridge.registerAccessory('homebridge-garage-door-opener', 'Garage Door Opener', GarageDoorOpener);
+  homebridge.registerAccessory('homebridge-sonoff-garage-opener', 'Sonoff Garage Door Opener', GarageDoorOpener);
 };
 
 class GarageDoorOpener {
@@ -52,7 +52,7 @@ class GarageDoorOpener {
 
     informationService
       .setCharacteristic(Characteristic.Manufacturer, 'Dualbit')
-      .setCharacteristic(Characteristic.Model, 'Sonoff-4CH Pro Garage Door Opener')
+      .setCharacteristic(Characteristic.Model, 'Sonoff Garage Door Opener')
       .setCharacteristic(Characteristic.SerialNumber, '0xl33t');
 
     this.service = new Service.GarageDoorOpener(this.name, this.name);

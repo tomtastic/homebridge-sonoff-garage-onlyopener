@@ -10,7 +10,7 @@
 
   "accessories": [
     {
-      "accessory": "Garage Door Opener",
+      "accessory": "Sonoff Garage Door Opener",
       "name": "Pi Garage Opener",
       "ip": "192.168.2.75",
       "doorRelayPin": 4,
