@@ -1,7 +1,7 @@
 {
-  "name": "homebridge-sonoff-garage-door",
+  "name": "homebridge-sonoff-garage-opener",
   "version": "1.0.0",
-  "description": "Homebridge plugin for Sonoff-4CH to open garage doors and such",
+  "description": "Homebridge plugin for Sonoff-4CH to open garage doors and gates with the Garage UI on the HomeKit App",
   "main": "index.js",
   "engines": {
     "node": ">=6.12.2",
