@@ -36,7 +36,7 @@ class GarageDoorOpener {
       url: 'http://' + this.ip + '/control?cmd=Pulse,' + this.doorRelayPin + ',1,500' /*+ (cmd || 'Signal')*/,
       timeout: 120000
     }, (error, response, body) => {
-      this.log.debug('openCloseGarage',response.statusCode,body);
+      this.log.debug('openCloseGarage',response,body);
       if (!error && response.statusCode == 200) {
         //this.log.debug('Response: %s', body);
         callback();
