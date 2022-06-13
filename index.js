@@ -80,19 +80,7 @@ class GarageDoorOpener {
             // Do nothing
           }
         } else if (this.targetDoorState === TargetDoorState.CLOSED) {
-          if (this.currentDoorState === CurrentDoorState.CLOSED) {
-            // Do nothing
-          } else if (this.currentDoorState === CurrentDoorState.OPENING) {
-            this.openCloseGarage(() =>
-              this.openCloseGarage(() =>
-                this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.CLOSING)));
-            // Do nothing
-          } else if (this.currentDoorState === CurrentDoorState.CLOSING) {
-            // Do nothing
-          } else if (this.currentDoorState === CurrentDoorState.OPEN) {
-            this.openCloseGarage(() =>
-              this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.CLOSING));
-          }
+          // edit : Do nothing
         }
         callback();
       });
@@ -133,8 +121,7 @@ class GarageDoorOpener {
             this.log.debug('AUTOCLOSING in ' + this.timeBeforeClosure / 1000 + ' SECONDS');
             this.timerBeforeClosure = setTimeout(() => {
               this.targetDoorState = TargetDoorState.CLOSED;
-              this.openCloseGarage(() =>
-                this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED));
+              // edit : Do nothing
             }, this.timeBeforeClosure);
           } else {
             this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED);
