@@ -1,4 +1,4 @@
-# Homebridge Sonoff Garage Door Opener
+# Homebridge Sonoff Garage Door ONLY-Opener
 
 This is a [homebridge](https://github.com/nfarina/homebridge) plugin to connect with a Sonoff Relay Board with ESPEasy firmware into a Garage Door Opener via the Home app on iOS using Homekit.
 
