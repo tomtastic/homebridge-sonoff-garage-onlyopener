@@ -1,6 +1,6 @@
 {
   "name": "homebridge-sonoff-garage-onlyopener",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Homebridge plugin for Sonoff-4CH to open garage doors and gates with the Garage UI on the HomeKit App",
   "main": "index.js",
   "engines": {
