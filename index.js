@@ -47,6 +47,23 @@ class GarageDoorOpener {
 
   }
 
+  closeGarage(callback) {
+
+    request.get({
+      url: 'http://' + this.ip + '/',
+      timeout: 120000
+    }, (error, response, body) => {
+      this.log.debug('CloseGarage',response.statusCode,body);
+      if (!error && response.statusCode == 200) {
+        //this.log.debug('Response: %s', body);
+        callback();
+      }
+
+      //this.log.debug('Error setting door state. (%s)', error);
+    });
+
+  }
+
   getServices() {
     const informationService = new Service.AccessoryInformation();
 
@@ -80,7 +97,19 @@ class GarageDoorOpener {
             // Do nothing
           }
         } else if (this.targetDoorState === TargetDoorState.CLOSED) {
-          // edit : Do nothing
+          if (this.currentDoorState === CurrentDoorState.CLOSED) {
+            // Do nothing
+          } else if (this.currentDoorState === CurrentDoorState.OPENING) {
+            this.closeGarage(() =>
+              this.closeGarage(() =>
+                this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.CLOSING)));
+            // Do nothing
+          } else if (this.currentDoorState === CurrentDoorState.CLOSING) {
+            // Do nothing
+          } else if (this.currentDoorState === CurrentDoorState.OPEN) {
+            this.closeGarage(() =>
+              this.service.setCharacteristic(CurrentDoorState, CurrentDoorState.CLOSING));
+          }
         }
         callback();
       });
@@ -121,7 +150,8 @@ class GarageDoorOpener {
             this.log.debug('AUTOCLOSING in ' + this.timeBeforeClosure / 1000 + ' SECONDS');
             this.timerBeforeClosure = setTimeout(() => {
               this.targetDoorState = TargetDoorState.CLOSED;
-              // edit : Do nothing
+              this.closeGarage(() =>
+                this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED));
             }, this.timeBeforeClosure);
           } else {
             this.service.setCharacteristic(TargetDoorState, TargetDoorState.CLOSED);
