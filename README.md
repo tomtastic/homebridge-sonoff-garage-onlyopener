@@ -2,6 +2,10 @@
 
 This is a [homebridge](https://github.com/nfarina/homebridge) plugin to connect with a Sonoff Relay Board with ESPEasy firmware into a Garage Door Opener via the Home app on iOS using Homekit.
 
+*In this simple modification of the plugin we only issue commands to the Sonoff Relay Board API for 'Open' events*
+*And make a simple GET request with no parameters toward the root `/` of the Sonoff Relay Board API for 'Close' events*
+*This caters for garage doors systems which can only be opened and always automatically close after a time delay unless obstructed.*
+
 ![](sonoff-garage-opener.gif)
 
 I created this because there wasn't another plugin for Sonoff-4CH Pro with ESPEasy with the Garage Door interface/features.
